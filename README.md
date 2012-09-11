@@ -27,3 +27,7 @@ Usage:
 	</configuration>
 </plugin>
 ```
+
+Dependencies:
+
+  This plugin uses yuicompressor for minifying compiled output
