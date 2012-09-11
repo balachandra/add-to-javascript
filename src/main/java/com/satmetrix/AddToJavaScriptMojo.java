@@ -157,6 +157,7 @@ public class AddToJavaScriptMojo extends AbstractMojo
         }
     }
 
+	// courtesy Bienvenido David. http://blog.teamextension.com/yui-compressor-in-java-246
     public void compressJavaScript(String inputFilename, String outputFilename)
             throws IOException
     {
@@ -181,6 +182,7 @@ public class AddToJavaScriptMojo extends AbstractMojo
         }
     }
 
+	// courtesy Bienvenido David. http://blog.teamextension.com/yui-compressor-in-java-246
     private class YuiCompressorErrorReporter implements ErrorReporter
     {
         public void warning(String message, String sourceName, int line,
