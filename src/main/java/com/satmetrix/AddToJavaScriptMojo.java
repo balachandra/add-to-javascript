@@ -40,7 +40,7 @@ import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
  * Combine multiple html template files into one javascript file where html
  * content would be defined as javascript variables.
  * 
- * @goal install
+ * @goal run
  * 
  * @phase process-resources
  * 
@@ -92,14 +92,20 @@ public class AddToJavaScriptMojo extends AbstractMojo
                 File[] fileList = dir.listFiles();
 
                 File of = new File(((null == outputDir) ? folder : outputDir),
-                        (dir.getName() + ".js"));
+                        (dir.getName() + ".template.js"));
 
                 OutputStream outputStream = new FileOutputStream(of);
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(outputStream, encoding));
 
-                for (File file : fileList)
+                writer.write("var ");
+
+                int lastIndex = fileList.length - 1;
+                for (int i = 0; i < fileList.length; i++)
                 {
+
+                    File file = fileList[i];
+
                     if (!file.getName().endsWith(fileType))
                     {
                         continue;
@@ -110,44 +116,60 @@ public class AddToJavaScriptMojo extends AbstractMojo
                     BufferedReader reader = new BufferedReader(
                             new InputStreamReader(inputStream, encoding));
 
-                    writer.write("var ");
+                    writer.write(dir.getName().toLowerCase());
+                    writer.write("_");
                     writer.write(file.getName().toLowerCase()
                             .replaceAll("\\.", "_"));
                     writer.write("= ");
 
                     String data = reader.readLine();
+
+                    boolean off = false;
+
                     while (null != data)
                     {
                         data = data.trim();
+
                         if (!"".equals(data))
                         {
+                            if (off)
+                            {
+                                writer.write(" + ");
+                                writer.newLine();
+                            }
+                            else
+                            {
+                                off = true;
+                            }
+
                             data = data.replaceAll("\"", "'");
                             writer.write("\"");
                             writer.write(data);
                             writer.write("\"");
+
                         }
                         data = reader.readLine();
-                        if (null != data)
-                        {
-                            writer.write(" + ");
-                            writer.newLine();
-                        }
+
                     }
-                    writer.write(";");
+                    if (i != lastIndex)
+                    {
+                        writer.write(",");
+                    }
                     writer.newLine();
 
                     reader.close();
 
                 }
+                writer.write(";");
 
                 writer.flush();
                 writer.close();
 
                 compressJavaScript(
                         (((null == outputDir) ? folder : outputDir) + (dir
-                                .getName() + ".js")),
+                                .getName() + ".template.js")),
                         (((null == outputDir) ? folder : outputDir) + (dir
-                                .getName() + ".min.js")));
+                                .getName() + ".template.min.js")));
 
             }
             catch (Exception e)
@@ -157,7 +179,8 @@ public class AddToJavaScriptMojo extends AbstractMojo
         }
     }
 
-	// courtesy Bienvenido David. http://blog.teamextension.com/yui-compressor-in-java-246
+    // courtesy Bienvenido David.
+    // http://blog.teamextension.com/yui-compressor-in-java-246
     public void compressJavaScript(String inputFilename, String outputFilename)
             throws IOException
     {
@@ -182,7 +205,8 @@ public class AddToJavaScriptMojo extends AbstractMojo
         }
     }
 
-	// courtesy Bienvenido David. http://blog.teamextension.com/yui-compressor-in-java-246
+    // courtesy Bienvenido David.
+    // http://blog.teamextension.com/yui-compressor-in-java-246
     private class YuiCompressorErrorReporter implements ErrorReporter
     {
         public void warning(String message, String sourceName, int line,
